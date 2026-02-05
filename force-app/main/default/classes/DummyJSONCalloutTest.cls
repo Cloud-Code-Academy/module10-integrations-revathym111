@@ -150,6 +150,15 @@ public with sharing class DummyJSONCalloutTest {
 		Database.SaveResult[] sr = Database.insert(contacts, dml);
 		Test.stopTest();
 
+		List<Id> successfulIds = new List<Id>();
+
+// Iterate through each returned result
+for (Database.SaveResult s : sr) {
+    if (s.isSuccess()) {
+        successfulIds.add(s.getId());
+	}
+}
+
 		// After the stopTest, the future method will have run. Now we can check if the contact was created correctly.
 		contacts = [
 			SELECT
@@ -163,8 +172,9 @@ public with sharing class DummyJSONCalloutTest {
 				MailingState,
 				MailingCountry
 			FROM Contact
-			WHERE Id IN :contacts AND DummyJSON_Id__c != NULL
+			WHERE Id IN :successfulIds AND DummyJSON_Id__c != NULL
 		];
+		System.debug('Contacts Created' + contacts);
 		Assert.isTrue(!contacts.isEmpty(), 'No contacts were created');
 
 		for (Contact cont : contacts) {
